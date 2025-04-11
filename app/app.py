@@ -237,9 +237,9 @@ class AccessCheck(customtkinter.CTkFrame):
                     {"role": "user", "content": prompt_text},
                 ],
             )
-            data = response["choices"][0]["message"]["content"]
-            data = re.sub(r"^```json\s*|```\s*$", "", data, flags=re.MULTILINE)
-            return data.strip()
+            content = response["choices"][0]["message"]["content"]
+            content = re.sub(r"^```json\s*|```\s*$", "", content, flags=re.MULTILINE)
+            return content.strip()
         except Exception as e:
             self.logger.error(e)
             return None
@@ -326,7 +326,6 @@ class App(customtkinter.CTk):
         self.views = {
             "AccessCheck": AccessCheck(parent=self.content_frame, logger=self.logger),
         }
-
         # Hiện view mặc định
         self.current_view = None
         self.SwitchTab("AccessCheck")
@@ -335,8 +334,12 @@ class App(customtkinter.CTk):
     def SwitchTab(self, view_name):
         if self.current_view:
             self.views[self.current_view].grid_forget()
-        self.views[view_name].grid(row=0, column=0, sticky="nsew")
-        self.current_view = view_name
+        if view_name in self.views.keys():
+            self.views[view_name].grid(row=0, column=0, sticky="nsew")
+            self.current_view = view_name
+        else:
+            msg.showinfo("Thông Báo","Chưa Hỗ Trợ")
+            return
 
     @HandleException
     def ChangeAppearanceMode(self, new_appearance_mode: str):
