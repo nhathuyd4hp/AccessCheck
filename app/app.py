@@ -177,16 +177,32 @@ class AccessCheck(customtkinter.CTkFrame):
             password="Robot159753",
             download_directory=SHAREPOINT_DOWNLOAD_PATH,
         )
-        for link in Yokohama["資料リンク"].to_list()[:2]:
+        for url in Yokohama["資料リンク"].to_list():
+            # Download PDF
             success, _ = SP.download_file(
-                site_url=link,
+                site_url=url,
                 file_pattern="割付図・エクセル/.*.pdf$",
             )
             if not success:
                 success, _ = SP.download_file(
-                    site_url=link,
+                    site_url=url,
                     file_pattern="割付図。エクセル/.*.pdf$",
                 )
+            # Download Excel
+            from selenium.webdriver.support import expected_conditions as EC
+            from selenium.webdriver.support.wait import WebDriverWait
+            from selenium.webdriver.common.by import By
+            try:
+                mitsumorisho = WebDriverWait(SP.browser,60).wait.until(
+                    EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'見積')]"))
+                )
+                if mitsumorisho.text.endswith(('xlsx','xls', 'xlsm')):
+                    print("mitsumorisho excel file found.")
+                else:
+                    print("mitsumorisho folder found.")
+            except: 
+                pass
+
         del SP
         # ------- Extract Data from PDF  ------- #
         pdfProcessor = PDFProcessor(
